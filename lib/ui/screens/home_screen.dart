@@ -6,6 +6,7 @@ import '../widgets/location_details_card.dart';
 import '../widgets/permission_banner.dart';
 import '../widgets/route_map_widget.dart';
 import '../widgets/history_sheet.dart';
+import '../widgets/ai_summary_card.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -238,6 +239,13 @@ class HomeScreen extends StatelessWidget {
                                 lastCompletedSession: provider.lastCompletedSession,
                                 currentPoint: provider.currentPoint,
                                 isTracking: isTracking,
+                              ),
+                              const SizedBox(height: 16),
+
+                              // AI Visit Assistant & Summary Card
+                              AiSummaryCard(
+                                sessions: provider.history,
+                                activeSession: provider.activeSession,
                               ),
                             ],
                           ),

@@ -40,6 +40,10 @@ dependencies:
   shared_preferences: ^2.5.5
   intl: ^0.20.3
   provider: ^6.1.5+1
+  google_generative_ai: ^0.4.7
+  geocoding: ^5.0.0
+  http: ^1.6.0
+  geocoding_platform_interface: ^5.0.0
 
 dev_dependencies:
   flutter_test:
