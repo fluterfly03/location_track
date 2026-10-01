@@ -6,9 +6,9 @@ import '../widgets/location_details_card.dart';
 import '../widgets/permission_banner.dart';
 import '../widgets/route_map_widget.dart';
 import '../widgets/history_sheet.dart';
-import '../widgets/ai_summary_card.dart';
 import '../widgets/offline_sync_card.dart';
 import '../widgets/api_distance_card.dart';
+import 'ai_summary_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -28,7 +28,10 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  void _showCheckoutSummaryDialog(BuildContext context, TrackingProvider provider) {
+  void _showCheckoutSummaryDialog(
+    BuildContext context,
+    TrackingProvider provider,
+  ) {
     final session = provider.lastCompletedSession;
     if (session == null) return;
 
@@ -58,7 +61,11 @@ class HomeScreen extends StatelessWidget {
                   children: [
                     const Text(
                       'TOTAL DISTANCE',
-                      style: TextStyle(color: Colors.white54, fontSize: 10, letterSpacing: 1.2),
+                      style: TextStyle(
+                        color: Colors.white54,
+                        fontSize: 10,
+                        letterSpacing: 1.2,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -85,7 +92,10 @@ class HomeScreen extends StatelessWidget {
               'End Location:',
               '${session.endLocation?.latitude.toStringAsFixed(5)}, ${session.endLocation?.longitude.toStringAsFixed(5)}',
             ),
-            _buildDetailRow('Waypoints Logged:', '${session.points.length} points'),
+            _buildDetailRow(
+              'Waypoints Logged:',
+              '${session.points.length} points',
+            ),
           ],
         ),
         actions: [
@@ -93,7 +103,9 @@ class HomeScreen extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF10B981),
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
             onPressed: () => Navigator.pop(ctx),
             child: const Text('Close Summary'),
@@ -113,13 +125,21 @@ class HomeScreen extends StatelessWidget {
             width: 110,
             child: Text(
               label,
-              style: TextStyle(fontSize: 11, color: Colors.grey.shade600, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                fontSize: 11,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(fontSize: 11, color: Colors.black87, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                fontSize: 11,
+                color: Colors.black87,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],
@@ -146,7 +166,11 @@ class HomeScreen extends StatelessWidget {
                     color: const Color(0xFF10B981).withValues(alpha: 0.2),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.navigation_rounded, color: Color(0xFF34D399), size: 20),
+                  child: const Icon(
+                    Icons.navigation_rounded,
+                    color: Color(0xFF34D399),
+                    size: 20,
+                  ),
                 ),
                 const SizedBox(width: 10),
                 const Column(
@@ -169,6 +193,16 @@ class HomeScreen extends StatelessWidget {
               ],
             ),
             actions: [
+              IconButton(
+                icon: const Icon(Icons.auto_awesome, color: Color(0xFF818CF8)),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const AiSummaryScreen()),
+                  );
+                },
+                tooltip: 'AI Visit Assistant',
+              ),
               IconButton(
                 icon: Badge(
                   label: Text('${provider.history.length}'),
@@ -205,15 +239,14 @@ class HomeScreen extends StatelessWidget {
                               PermissionBanner(
                                 isGpsEnabled: provider.isGpsEnabled,
                                 permission: provider.permission,
-                                onRequestPermission: () => provider.requestPermissions(),
-                                onOpenGpsSettings: () => provider.openLocationSettings(),
-                                onOpenAppSettings: () => provider.openAppSettings(),
+                                onRequestPermission: () =>
+                                    provider.requestPermissions(),
+                                onOpenGpsSettings: () =>
+                                    provider.openLocationSettings(),
+                                onOpenAppSettings: () =>
+                                    provider.openAppSettings(),
                               ),
-
-                              // Task 2: API Distance Service Card
-                              const ApiDistanceCard(),
-                              const SizedBox(height: 16),
-
+                              const SizedBox(height: 10),
                               // Task 1: Offline & Synchronization Status Card
                               const OfflineSyncCard(),
                               const SizedBox(height: 16),
@@ -221,9 +254,11 @@ class HomeScreen extends StatelessWidget {
                               // Live Metrics Card (Distance in km, Duration, Speed)
                               LiveMetricsCard(
                                 session: provider.activeSession,
-                                lastCompletedSession: provider.lastCompletedSession,
+                                lastCompletedSession:
+                                    provider.lastCompletedSession,
                                 isTracking: isTracking,
-                                currentSpeedMps: provider.currentPoint?.speed ?? 0.0,
+                                currentSpeedMps:
+                                    provider.currentPoint?.speed ?? 0.0,
                               ),
                               const SizedBox(height: 16),
 
@@ -231,13 +266,19 @@ class HomeScreen extends StatelessWidget {
                               SizedBox(
                                 height: 260,
                                 child: RouteMapWidget(
-                                  points: provider.activeSession?.points ??
+                                  points:
+                                      provider.activeSession?.points ??
                                       provider.lastCompletedSession?.points ??
                                       [],
                                   currentPoint: provider.currentPoint,
-                                  startPoint: provider.activeSession?.startLocation ??
-                                      provider.lastCompletedSession?.startLocation,
-                                  endPoint: provider.lastCompletedSession?.endLocation,
+                                  startPoint:
+                                      provider.activeSession?.startLocation ??
+                                      provider
+                                          .lastCompletedSession
+                                          ?.startLocation,
+                                  endPoint: provider
+                                      .lastCompletedSession
+                                      ?.endLocation,
                                   isTracking: isTracking,
                                 ),
                               ),
@@ -246,16 +287,89 @@ class HomeScreen extends StatelessWidget {
                               // Coordinates and Timestamps Card
                               LocationDetailsCard(
                                 session: provider.activeSession,
-                                lastCompletedSession: provider.lastCompletedSession,
+                                lastCompletedSession:
+                                    provider.lastCompletedSession,
                                 currentPoint: provider.currentPoint,
                                 isTracking: isTracking,
                               ),
                               const SizedBox(height: 16),
-
-                              // AI Visit Assistant & Summary Card
-                              AiSummaryCard(
-                                sessions: provider.history,
-                                activeSession: provider.activeSession,
+                              // Task 2: API Distance Service Card
+                              const ApiDistanceCard(),
+                              const SizedBox(height: 16),
+                              // AI Visit Assistant Navigation Card Button
+                              Card(
+                                elevation: 2,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                color: Colors.white,
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(20),
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => const AiSummaryScreen(),
+                                      ),
+                                    );
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(20),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(12),
+                                          decoration: BoxDecoration(
+                                            gradient: const LinearGradient(
+                                              colors: [
+                                                Color(0xFF8B5CF6),
+                                                Color(0xFF6366F1),
+                                              ],
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              16,
+                                            ),
+                                          ),
+                                          child: const Icon(
+                                            Icons.auto_awesome,
+                                            color: Colors.white,
+                                            size: 24,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 16),
+                                        const Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'AI Visit Assistant',
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Color(0xFF0F172A),
+                                                ),
+                                              ),
+                                              SizedBox(height: 2),
+                                              Text(
+                                                'Tap to view AI summaries & ask Q&A',
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  color: Colors.grey,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const Icon(
+                                          Icons.arrow_forward_ios_rounded,
+                                          color: Color(0xFF6366F1),
+                                          size: 18,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
                               ),
                             ],
                           ),
@@ -264,10 +378,15 @@ class HomeScreen extends StatelessWidget {
 
                       // Bottom Action Control Bar
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 16,
+                        ),
                         decoration: const BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                          borderRadius: BorderRadius.vertical(
+                            top: Radius.circular(24),
+                          ),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black12,
@@ -288,7 +407,9 @@ class HomeScreen extends StatelessWidget {
                                     backgroundColor: const Color(0xFF10B981),
                                     foregroundColor: Colors.white,
                                     elevation: 4,
-                                    shadowColor: const Color(0xFF10B981).withValues(alpha: 0.4),
+                                    shadowColor: const Color(
+                                      0xFF10B981,
+                                    ).withValues(alpha: 0.4),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(16),
                                     ),
@@ -296,7 +417,9 @@ class HomeScreen extends StatelessWidget {
                                   onPressed: () async {
                                     final success = await provider.checkIn();
                                     if (!success && context.mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
                                         SnackBar(
                                           content: Text(provider.statusMessage),
                                           backgroundColor: Colors.redAccent,
@@ -330,7 +453,9 @@ class HomeScreen extends StatelessWidget {
                                     backgroundColor: const Color(0xFFEF4444),
                                     foregroundColor: Colors.white,
                                     elevation: 4,
-                                    shadowColor: const Color(0xFFEF4444).withValues(alpha: 0.4),
+                                    shadowColor: const Color(
+                                      0xFFEF4444,
+                                    ).withValues(alpha: 0.4),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(16),
                                     ),
@@ -338,7 +463,10 @@ class HomeScreen extends StatelessWidget {
                                   onPressed: () async {
                                     await provider.checkOut();
                                     if (context.mounted) {
-                                      _showCheckoutSummaryDialog(context, provider);
+                                      _showCheckoutSummaryDialog(
+                                        context,
+                                        provider,
+                                      );
                                     }
                                   },
                                   child: const Row(
