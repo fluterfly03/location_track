@@ -32,21 +32,45 @@ class _RouteMapWidgetState extends State<RouteMapWidget> {
   void didUpdateWidget(covariant RouteMapWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (_followUser && widget.currentPoint != null) {
-      _centerOnCurrentLocation();
+      final oldPt = oldWidget.currentPoint;
+      final newPt = widget.currentPoint;
+      final locationChanged = oldPt == null ||
+          oldPt.latitude != newPt!.latitude ||
+          oldPt.longitude != newPt.longitude;
+
+      if (locationChanged) {
+        debugPrint('MAP CAMERA MOVED: ${newPt!.latitude}, ${newPt.longitude}');
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && _followUser) {
+            _centerOnCurrentLocation();
+          }
+        });
+      }
     }
   }
 
   void _centerOnCurrentLocation() {
     if (widget.currentPoint != null) {
-      _mapController.move(
-        LatLng(widget.currentPoint!.latitude, widget.currentPoint!.longitude),
-        _mapController.camera.zoom < 14 ? 16 : _mapController.camera.zoom,
-      );
+      try {
+        double currentZoom = 16.0;
+        try {
+          currentZoom = _mapController.camera.zoom < 14 ? 16 : _mapController.camera.zoom;
+        } catch (_) {}
+        _mapController.move(
+          LatLng(widget.currentPoint!.latitude, widget.currentPoint!.longitude),
+          currentZoom,
+        );
+      } catch (e) {
+        debugPrint('Error moving map camera: $e');
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (widget.currentPoint != null) {
+      debugPrint('MAP WIDGET UPDATED: ${widget.currentPoint!.latitude}, ${widget.currentPoint!.longitude}');
+    }
     LatLng centerLocation = const LatLng(0, 0);
 
     if (widget.currentPoint != null) {
@@ -77,15 +101,20 @@ class _RouteMapWidgetState extends State<RouteMapWidget> {
       markers.add(
         Marker(
           point: LatLng(widget.startPoint!.latitude, widget.startPoint!.longitude),
-          width: 50.r,
-          height: 50.r,
+          width: 60.r,
+          height: 60.r,
+          alignment: Alignment.topCenter,
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
                 decoration: BoxDecoration(
                   color: const Color(0xFF10B981),
                   borderRadius: BorderRadius.circular(4.r),
+                  boxShadow: const [
+                    BoxShadow(color: Colors.black26, blurRadius: 4),
+                  ],
                 ),
                 child: Text(
                   'START',
@@ -108,15 +137,20 @@ class _RouteMapWidgetState extends State<RouteMapWidget> {
       markers.add(
         Marker(
           point: LatLng(widget.endPoint!.latitude, widget.endPoint!.longitude),
-          width: 50.r,
-          height: 50.r,
+          width: 60.r,
+          height: 60.r,
+          alignment: Alignment.topCenter,
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
                 decoration: BoxDecoration(
                   color: Colors.redAccent,
                   borderRadius: BorderRadius.circular(4.r),
+                  boxShadow: const [
+                    BoxShadow(color: Colors.black26, blurRadius: 4),
+                  ],
                 ),
                 child: Text(
                   'END',
@@ -134,35 +168,92 @@ class _RouteMapWidgetState extends State<RouteMapWidget> {
       );
     }
 
-    // Current Location Marker (Pulsing Dot)
+    // Current Location Marker (Pulsing Dot + Live Tooltip)
     if (widget.currentPoint != null && widget.isTracking) {
       markers.add(
         Marker(
           point: LatLng(widget.currentPoint!.latitude, widget.currentPoint!.longitude),
-          width: 44.r,
-          height: 44.r,
-          child: Stack(
-            alignment: Alignment.center,
+          width: 150.r,
+          height: 72.r,
+          alignment: Alignment.topCenter,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
+              // Live Location Tooltip
               Container(
-                width: 36.r,
-                height: 36.r,
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                 decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.blueAccent.withValues(alpha: 0.3),
-                ),
-              ),
-              Container(
-                width: 20.r,
-                height: 20.r,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.blueAccent,
-                  border: Border.all(color: Colors.white, width: 3.r),
+                  color: const Color(0xFF0F172A),
+                  borderRadius: BorderRadius.circular(8.r),
+                  border: Border.all(color: Colors.blueAccent, width: 1.2),
                   boxShadow: const [
-                    BoxShadow(color: Colors.black26, blurRadius: 4),
+                    BoxShadow(color: Colors.black38, blurRadius: 6, offset: Offset(0, 2)),
                   ],
                 ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 6.r,
+                          height: 6.r,
+                          decoration: const BoxDecoration(
+                            color: Colors.greenAccent,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        SizedBox(width: 4.w),
+                        Text(
+                          'LIVE LOCATION',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 8.sp,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Text(
+                      '${widget.currentPoint!.latitude.toStringAsFixed(5)}, ${widget.currentPoint!.longitude.toStringAsFixed(5)}',
+                      style: TextStyle(
+                        color: Colors.blueAccent.shade100,
+                        fontSize: 9.sp,
+                        fontFamily: 'monospace',
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 2.h),
+              // Pulsing Dot Icon
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    width: 28.r,
+                    height: 28.r,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.blueAccent.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  Container(
+                    width: 16.r,
+                    height: 16.r,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.blueAccent,
+                      border: Border.all(color: Colors.white, width: 2.5.r),
+                      boxShadow: const [
+                        BoxShadow(color: Colors.black26, blurRadius: 4),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

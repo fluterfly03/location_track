@@ -29,7 +29,7 @@ class LocationService {
       final position = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.best,
-          timeLimit: Duration(seconds: 15),
+          timeLimit: Duration(seconds: 10),
         ),
       );
       return TrackingPoint(
@@ -41,6 +41,18 @@ class LocationService {
       );
     } catch (e) {
       debugPrint('Error getting current location: $e');
+      try {
+        final lastPos = await Geolocator.getLastKnownPosition();
+        if (lastPos != null) {
+          return TrackingPoint(
+            latitude: lastPos.latitude,
+            longitude: lastPos.longitude,
+            timestamp: lastPos.timestamp,
+            accuracy: lastPos.accuracy,
+            speed: lastPos.speed,
+          );
+        }
+      } catch (_) {}
       return null;
     }
   }
@@ -52,9 +64,9 @@ class LocationService {
     if (defaultTargetPlatform == TargetPlatform.android) {
       locationSettings = AndroidSettings(
         accuracy: LocationAccuracy.best,
-        distanceFilter: 3, // Minimum displacement in meters before update event
-        intervalDuration: const Duration(seconds: 2),
-        forceLocationManager: false,
+        distanceFilter: 0, // Set to 0 to capture every movement step
+        intervalDuration: const Duration(seconds: 1),
+        forceLocationManager: true, // Forces Android OS LocationManager so emulator mock locations update immediately
         foregroundNotificationConfig: const ForegroundNotificationConfig(
           notificationTitle: "Location Tracker Active",
           notificationText: "Tracking your movement in background",
@@ -67,14 +79,14 @@ class LocationService {
       locationSettings = AppleSettings(
         accuracy: LocationAccuracy.best,
         activityType: ActivityType.fitness,
-        distanceFilter: 3,
+        distanceFilter: 0,
         pauseLocationUpdatesAutomatically: false,
         showBackgroundLocationIndicator: true,
       );
     } else {
       locationSettings = const LocationSettings(
         accuracy: LocationAccuracy.best,
-        distanceFilter: 3,
+        distanceFilter: 0,
       );
     }
 
@@ -96,10 +108,10 @@ class LocationService {
   static double? processNewLocationPoint({
     required TrackingPoint? lastRecordedPoint,
     required Position newPosition,
-    double maxAllowedAccuracyMeters = 35.0,
-    double minDistanceThresholdMeters = 3.0,
+    double maxAllowedAccuracyMeters = 200.0,
+    double minDistanceThresholdMeters = 0.5,
   }) {
-    // 1. Accuracy Check: Ignore points with poor GPS accuracy
+    // 1. Accuracy Check: Ignore points with poor GPS accuracy (>200m)
     if (newPosition.accuracy > maxAllowedAccuracyMeters) {
       debugPrint(
           'Skipped point due to poor accuracy (${newPosition.accuracy}m > ${maxAllowedAccuracyMeters}m)');
@@ -119,7 +131,7 @@ class LocationService {
       newPosition.longitude,
     );
 
-    // If moved less than threshold (e.g. 3m), treat as noise / standing still
+    // If moved less than threshold (e.g. 1m), treat as stationary noise
     if (distanceMeters < minDistanceThresholdMeters) {
       debugPrint(
           'Skipped duplicate/stationary point ($distanceMeters m < $minDistanceThresholdMeters m)');

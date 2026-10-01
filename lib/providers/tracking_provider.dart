@@ -282,12 +282,36 @@ class TrackingProvider extends ChangeNotifier {
 
   void _startPositionStream() {
     _stopPositionStream();
-    _positionSubscription = LocationService.getPositionStream().listen(
+    try {
+      _positionSubscription = LocationService.getPositionStream().listen(
+        (Position position) {
+          debugPrint('GPS UPDATE: ${position.latitude}, ${position.longitude}, acc: ${position.accuracy}m');
+          _handleNewPosition(position);
+        },
+        onError: (error) {
+          debugPrint('Location stream error: $error. Switching to fallback stream.');
+          _startFallbackPositionStream();
+        },
+      );
+    } catch (e) {
+      debugPrint('Error starting position stream: $e. Using fallback.');
+      _startFallbackPositionStream();
+    }
+  }
+
+  void _startFallbackPositionStream() {
+    _stopPositionStream();
+    const fallbackSettings = LocationSettings(
+      accuracy: LocationAccuracy.best,
+      distanceFilter: 0,
+    );
+    _positionSubscription = Geolocator.getPositionStream(locationSettings: fallbackSettings).listen(
       (Position position) {
+        debugPrint('GPS UPDATE (FALLBACK): ${position.latitude}, ${position.longitude}, acc: ${position.accuracy}m');
         _handleNewPosition(position);
       },
       onError: (error) {
-        debugPrint('Location stream error: $error');
+        debugPrint('Fallback position stream error: $error');
       },
     );
   }
@@ -308,6 +332,8 @@ class TrackingProvider extends ChangeNotifier {
       speed: position.speed,
     );
 
+    debugPrint('TRACKING POINT CREATED: ${candidatePoint.latitude}, ${candidatePoint.longitude}');
+
     final lastPoint =
         _activeSession!.points.isNotEmpty ? _activeSession!.points.last : null;
 
@@ -317,6 +343,7 @@ class TrackingProvider extends ChangeNotifier {
     );
 
     _currentPoint = candidatePoint;
+    debugPrint('CURRENT POINT UPDATED: ${_currentPoint?.latitude}, ${_currentPoint?.longitude}');
 
     if (validDistance != null) {
       _activeSession!.points.add(candidatePoint);
