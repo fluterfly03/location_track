@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../models/tracking_point.dart';
 import '../../models/tracking_session.dart';
 
@@ -23,10 +24,10 @@ class LocationDetailsCard extends StatelessWidget {
     final endPt = active?.endLocation;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.r),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(20.r),
         boxShadow: const [
           BoxShadow(
             color: Colors.black12,
@@ -42,35 +43,36 @@ class LocationDetailsCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: EdgeInsets.all(8.r),
                 decoration: BoxDecoration(
                   color: Colors.blue.shade50,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(10.r),
                 ),
-                child: Icon(Icons.my_location, color: Colors.blue.shade700, size: 20),
+                child: Icon(Icons.my_location, color: Colors.blue.shade700, size: 20.sp),
               ),
-              const SizedBox(width: 10),
-              const Text(
-                'Coordinates & Timestamps',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+              SizedBox(width: 10.w),
+              Expanded(
+                child: Text(
+                  'Coordinates & Timestamps',
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
                 ),
               ),
-              const Spacer(),
               if (currentPoint != null && isTracking)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
                   decoration: BoxDecoration(
                     color: Colors.green.shade50,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(12.r),
                     border: Border.all(color: Colors.green.shade200),
                   ),
                   child: Text(
                     'Acc: ±${currentPoint!.accuracy.toStringAsFixed(1)}m',
                     style: TextStyle(
-                      fontSize: 11,
+                      fontSize: 11.sp,
                       fontWeight: FontWeight.w600,
                       color: Colors.green.shade800,
                     ),
@@ -78,7 +80,7 @@ class LocationDetailsCard extends StatelessWidget {
                 ),
             ],
           ),
-          const SizedBox(height: 14),
+          SizedBox(height: 14.h),
 
           // Start Location Row
           _buildCoordinateTile(
@@ -90,11 +92,11 @@ class LocationDetailsCard extends StatelessWidget {
             time: active?.formattedStartTime,
           ),
 
-          const Padding(
-            padding: EdgeInsets.only(left: 20),
+          Padding(
+            padding: EdgeInsets.only(left: 20.w),
             child: SizedBox(
-              height: 16,
-              child: VerticalDivider(thickness: 1.5, color: Colors.grey),
+              height: 16.h,
+              child: const VerticalDivider(thickness: 1.5, color: Colors.grey),
             ),
           ),
 
@@ -138,36 +140,36 @@ class LocationDetailsCard extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, color: iconColor, size: 22),
-        const SizedBox(width: 12),
+        Icon(icon, color: iconColor, size: 22.sp),
+        SizedBox(width: 12.w),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 title,
-                style: const TextStyle(
-                  fontSize: 13,
+                style: TextStyle(
+                  fontSize: 13.sp,
                   fontWeight: FontWeight.w600,
                   color: Colors.black87,
                 ),
               ),
-              const SizedBox(height: 2),
+              SizedBox(height: 2.h),
               SelectableText(
                 'Lat: $latStr,  Lng: $lngStr',
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: 12.sp,
                   fontFamily: 'monospace',
                   fontWeight: FontWeight.w600,
                   color: Colors.grey.shade800,
                 ),
               ),
               if (time != null) ...[
-                const SizedBox(height: 1),
+                SizedBox(height: 1.h),
                 Text(
                   time,
                   style: TextStyle(
-                    fontSize: 11,
+                    fontSize: 11.sp,
                     color: Colors.grey.shade600,
                   ),
                 ),

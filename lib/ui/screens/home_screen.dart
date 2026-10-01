@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import '../../providers/tracking_provider.dart';
 import '../widgets/live_metrics_card.dart';
@@ -18,11 +19,16 @@ class HomeScreen extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => FractionallySizedBox(
-        heightFactor: 0.75,
-        child: HistorySheet(
-          history: provider.history,
-          onClearHistory: () => provider.clearHistory(),
+      builder: (ctx) => Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: 700.w),
+          child: FractionallySizedBox(
+            heightFactor: 0.75,
+            child: HistorySheet(
+              history: provider.history,
+              onClearHistory: () => provider.clearHistory(),
+            ),
+          ),
         ),
       ),
     );
@@ -37,96 +43,106 @@ class HomeScreen extends StatelessWidget {
 
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: const Row(
-          children: [
-            Icon(Icons.check_circle, color: Color(0xFF10B981), size: 28),
-            SizedBox(width: 8),
-            Text('Trip Completed!'),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color(0xFF0F172A),
-                borderRadius: BorderRadius.circular(16),
+      builder: (ctx) => Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: 450.w),
+          child: AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
+            title: Row(
+              children: [
+                Icon(Icons.check_circle, color: const Color(0xFF10B981), size: 28.sp),
+                SizedBox(width: 8.w),
+                Text('Trip Completed!', style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
+              ],
+            ),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(16.r),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0F172A),
+                      borderRadius: BorderRadius.circular(16.r),
+                    ),
+                    child: Center(
+                      child: Column(
+                        children: [
+                          Text(
+                            'TOTAL DISTANCE',
+                            style: TextStyle(
+                              color: Colors.white54,
+                              fontSize: 10.sp,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                          SizedBox(height: 4.h),
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              session.formattedDistanceKm,
+                              style: TextStyle(
+                                color: const Color(0xFF34D399),
+                                fontSize: 32.sp,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 16.h),
+                  _buildDetailRow('Duration:', session.formattedDuration),
+                  _buildDetailRow('Start Time:', session.formattedStartTime),
+                  _buildDetailRow('End Time:', session.formattedEndTime),
+                  _buildDetailRow(
+                    'Start Location:',
+                    '${session.startLocation?.latitude.toStringAsFixed(5)}, ${session.startLocation?.longitude.toStringAsFixed(5)}',
+                  ),
+                  _buildDetailRow(
+                    'End Location:',
+                    '${session.endLocation?.latitude.toStringAsFixed(5)}, ${session.endLocation?.longitude.toStringAsFixed(5)}',
+                  ),
+                  _buildDetailRow(
+                    'Waypoints Logged:',
+                    '${session.points.length} points',
+                  ),
+                ],
               ),
-              child: Center(
-                child: Column(
-                  children: [
-                    const Text(
-                      'TOTAL DISTANCE',
-                      style: TextStyle(
-                        color: Colors.white54,
-                        fontSize: 10,
-                        letterSpacing: 1.2,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      session.formattedDistanceKm,
-                      style: const TextStyle(
-                        color: Color(0xFF34D399),
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
+            ),
+            actions: [
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF10B981),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
                 ),
+                onPressed: () => Navigator.pop(ctx),
+                child: Text('Close Summary', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold)),
               ),
-            ),
-            const SizedBox(height: 16),
-            _buildDetailRow('Duration:', session.formattedDuration),
-            _buildDetailRow('Start Time:', session.formattedStartTime),
-            _buildDetailRow('End Time:', session.formattedEndTime),
-            _buildDetailRow(
-              'Start Location:',
-              '${session.startLocation?.latitude.toStringAsFixed(5)}, ${session.startLocation?.longitude.toStringAsFixed(5)}',
-            ),
-            _buildDetailRow(
-              'End Location:',
-              '${session.endLocation?.latitude.toStringAsFixed(5)}, ${session.endLocation?.longitude.toStringAsFixed(5)}',
-            ),
-            _buildDetailRow(
-              'Waypoints Logged:',
-              '${session.points.length} points',
-            ),
-          ],
-        ),
-        actions: [
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF10B981),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Close Summary'),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 
   static Widget _buildDetailRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 3),
+      padding: EdgeInsets.symmetric(vertical: 3.h),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 110,
+            width: 110.w,
             child: Text(
               label,
               style: TextStyle(
-                fontSize: 11,
+                fontSize: 11.sp,
                 color: Colors.grey.shade600,
                 fontWeight: FontWeight.w600,
               ),
@@ -135,8 +151,8 @@ class HomeScreen extends StatelessWidget {
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(
-                fontSize: 11,
+              style: TextStyle(
+                fontSize: 11.sp,
                 color: Colors.black87,
                 fontWeight: FontWeight.bold,
               ),
@@ -161,40 +177,44 @@ class HomeScreen extends StatelessWidget {
             title: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(6),
+                  padding: EdgeInsets.all(6.r),
                   decoration: BoxDecoration(
                     color: const Color(0xFF10B981).withValues(alpha: 0.2),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.navigation_rounded,
-                    color: Color(0xFF34D399),
-                    size: 20,
+                    color: const Color(0xFF34D399),
+                    size: 20.sp,
                   ),
                 ),
-                const SizedBox(width: 10),
-                const Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Location Tracker',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                SizedBox(width: 10.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Location Tracker',
+                        style: TextStyle(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                    Text(
-                      'Distance & GPS Tracker',
-                      style: TextStyle(fontSize: 11, color: Colors.white54),
-                    ),
-                  ],
+                      Text(
+                        'Distance & GPS Tracker',
+                        style: TextStyle(fontSize: 11.sp, color: Colors.white54),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
             actions: [
               IconButton(
-                icon: const Icon(Icons.auto_awesome, color: Color(0xFF818CF8)),
+                icon: Icon(Icons.auto_awesome, color: const Color(0xFF818CF8), size: 22.sp),
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -205,24 +225,24 @@ class HomeScreen extends StatelessWidget {
               ),
               IconButton(
                 icon: Badge(
-                  label: Text('${provider.history.length}'),
+                  label: Text('${provider.history.length}', style: TextStyle(fontSize: 10.sp)),
                   isLabelVisible: provider.history.isNotEmpty,
-                  child: const Icon(Icons.history, color: Colors.white),
+                  child: Icon(Icons.history, color: Colors.white, size: 22.sp),
                 ),
                 onPressed: () => _showHistoryModal(context, provider),
                 tooltip: 'Trip History',
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8.w),
             ],
           ),
           body: provider.isLoading
-              ? const Center(
+              ? Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      CircularProgressIndicator(color: Color(0xFF10B981)),
-                      SizedBox(height: 16),
-                      Text('Initializing location service...'),
+                      const CircularProgressIndicator(color: Color(0xFF10B981)),
+                      SizedBox(height: 16.h),
+                      Text('Initializing location service...', style: TextStyle(fontSize: 13.sp)),
                     ],
                   ),
                 )
@@ -230,263 +250,275 @@ class HomeScreen extends StatelessWidget {
                   child: Column(
                     children: [
                       Expanded(
-                        child: SingleChildScrollView(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              // Permission Banner if GPS or location permission needed
-                              PermissionBanner(
-                                isGpsEnabled: provider.isGpsEnabled,
-                                permission: provider.permission,
-                                onRequestPermission: () =>
-                                    provider.requestPermissions(),
-                                onOpenGpsSettings: () =>
-                                    provider.openLocationSettings(),
-                                onOpenAppSettings: () =>
-                                    provider.openAppSettings(),
-                              ),
-                              const SizedBox(height: 10),
-                              // Task 1: Offline & Synchronization Status Card
-                              const OfflineSyncCard(),
-                              const SizedBox(height: 16),
+                        child: Center(
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(maxWidth: 700.w),
+                            child: SingleChildScrollView(
+                              padding: EdgeInsets.all(16.r),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  // Permission Banner if GPS or location permission needed
+                                  PermissionBanner(
+                                    isGpsEnabled: provider.isGpsEnabled,
+                                    permission: provider.permission,
+                                    onRequestPermission: () =>
+                                        provider.requestPermissions(),
+                                    onOpenGpsSettings: () =>
+                                        provider.openLocationSettings(),
+                                    onOpenAppSettings: () =>
+                                        provider.openAppSettings(),
+                                  ),
+                                  SizedBox(height: 10.h),
+                                  // Task 1: Offline & Synchronization Status Card
+                                  const OfflineSyncCard(),
+                                  SizedBox(height: 16.h),
 
-                              // Live Metrics Card (Distance in km, Duration, Speed)
-                              LiveMetricsCard(
-                                session: provider.activeSession,
-                                lastCompletedSession:
-                                    provider.lastCompletedSession,
-                                isTracking: isTracking,
-                                currentSpeedMps:
-                                    provider.currentPoint?.speed ?? 0.0,
-                              ),
-                              const SizedBox(height: 16),
+                                  // Live Metrics Card (Distance in km, Duration, Speed)
+                                  LiveMetricsCard(
+                                    session: provider.activeSession,
+                                    lastCompletedSession:
+                                        provider.lastCompletedSession,
+                                    isTracking: isTracking,
+                                    currentSpeedMps:
+                                        provider.currentPoint?.speed ?? 0.0,
+                                  ),
+                                  SizedBox(height: 16.h),
 
-                              // Route Map Display
-                              SizedBox(
-                                height: 260,
-                                child: RouteMapWidget(
-                                  points:
-                                      provider.activeSession?.points ??
-                                      provider.lastCompletedSession?.points ??
-                                      [],
-                                  currentPoint: provider.currentPoint,
-                                  startPoint:
-                                      provider.activeSession?.startLocation ??
-                                      provider
+                                  // Route Map Display
+                                  SizedBox(
+                                    height: 260.h,
+                                    child: RouteMapWidget(
+                                      points:
+                                          provider.activeSession?.points ??
+                                          provider.lastCompletedSession?.points ??
+                                          [],
+                                      currentPoint: provider.currentPoint,
+                                      startPoint:
+                                          provider.activeSession?.startLocation ??
+                                          provider
+                                              .lastCompletedSession
+                                              ?.startLocation,
+                                      endPoint: provider
                                           .lastCompletedSession
-                                          ?.startLocation,
-                                  endPoint: provider
-                                      .lastCompletedSession
-                                      ?.endLocation,
-                                  isTracking: isTracking,
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-
-                              // Coordinates and Timestamps Card
-                              LocationDetailsCard(
-                                session: provider.activeSession,
-                                lastCompletedSession:
-                                    provider.lastCompletedSession,
-                                currentPoint: provider.currentPoint,
-                                isTracking: isTracking,
-                              ),
-                              const SizedBox(height: 16),
-                              // Task 2: API Distance Service Card
-                              const ApiDistanceCard(),
-                              const SizedBox(height: 16),
-                              // AI Visit Assistant Navigation Card Button
-                              Card(
-                                elevation: 2,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                color: Colors.white,
-                                child: InkWell(
-                                  borderRadius: BorderRadius.circular(20),
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => const AiSummaryScreen(),
-                                      ),
-                                    );
-                                  },
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(20),
-                                    child: Row(
-                                      children: [
-                                        Container(
-                                          padding: const EdgeInsets.all(12),
-                                          decoration: BoxDecoration(
-                                            gradient: const LinearGradient(
-                                              colors: [
-                                                Color(0xFF8B5CF6),
-                                                Color(0xFF6366F1),
-                                              ],
-                                            ),
-                                            borderRadius: BorderRadius.circular(
-                                              16,
-                                            ),
-                                          ),
-                                          child: const Icon(
-                                            Icons.auto_awesome,
-                                            color: Colors.white,
-                                            size: 24,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 16),
-                                        const Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                'AI Visit Assistant',
-                                                style: TextStyle(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Color(0xFF0F172A),
-                                                ),
-                                              ),
-                                              SizedBox(height: 2),
-                                              Text(
-                                                'Tap to view AI summaries & ask Q&A',
-                                                style: TextStyle(
-                                                  fontSize: 12,
-                                                  color: Colors.grey,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        const Icon(
-                                          Icons.arrow_forward_ios_rounded,
-                                          color: Color(0xFF6366F1),
-                                          size: 18,
-                                        ),
-                                      ],
+                                          ?.endLocation,
+                                      isTracking: isTracking,
                                     ),
                                   ),
-                                ),
+                                  SizedBox(height: 16.h),
+
+                                  // Coordinates and Timestamps Card
+                                  LocationDetailsCard(
+                                    session: provider.activeSession,
+                                    lastCompletedSession:
+                                        provider.lastCompletedSession,
+                                    currentPoint: provider.currentPoint,
+                                    isTracking: isTracking,
+                                  ),
+                                  SizedBox(height: 16.h),
+
+                                  // Task 2: API Distance Service Card
+                                  const ApiDistanceCard(),
+                                  SizedBox(height: 16.h),
+
+                                  // AI Visit Assistant Navigation Card Button
+                                  Card(
+                                    elevation: 2,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(20.r),
+                                    ),
+                                    color: Colors.white,
+                                    child: InkWell(
+                                      borderRadius: BorderRadius.circular(20.r),
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => const AiSummaryScreen(),
+                                          ),
+                                        );
+                                      },
+                                      child: Padding(
+                                        padding: EdgeInsets.all(20.r),
+                                        child: Row(
+                                          children: [
+                                            Container(
+                                              padding: EdgeInsets.all(12.r),
+                                              decoration: BoxDecoration(
+                                                gradient: const LinearGradient(
+                                                  colors: [
+                                                    Color(0xFF8B5CF6),
+                                                    Color(0xFF6366F1),
+                                                  ],
+                                                ),
+                                                borderRadius: BorderRadius.circular(
+                                                  16.r,
+                                                ),
+                                              ),
+                                              child: Icon(
+                                                Icons.auto_awesome,
+                                                color: Colors.white,
+                                                size: 24.sp,
+                                              ),
+                                            ),
+                                            SizedBox(width: 16.w),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    'AI Visit Assistant',
+                                                    style: TextStyle(
+                                                      fontSize: 16.sp,
+                                                      fontWeight: FontWeight.bold,
+                                                      color: const Color(0xFF0F172A),
+                                                    ),
+                                                  ),
+                                                  SizedBox(height: 2.h),
+                                                  Text(
+                                                    'Tap to view AI summaries & ask Q&A',
+                                                    style: TextStyle(
+                                                      fontSize: 12.sp,
+                                                      color: Colors.grey,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            Icon(
+                                              Icons.arrow_forward_ios_rounded,
+                                              color: const Color(0xFF6366F1),
+                                              size: 18.sp,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
+                            ),
                           ),
                         ),
                       ),
 
                       // Bottom Action Control Bar
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 16,
-                        ),
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.vertical(
-                            top: Radius.circular(24),
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black12,
-                              blurRadius: 12,
-                              offset: Offset(0, -4),
+                      Center(
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(maxWidth: 700.w),
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 20.w,
+                              vertical: 16.h,
                             ),
-                          ],
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (!isTracking)
-                              SizedBox(
-                                width: double.infinity,
-                                height: 56,
-                                child: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF10B981),
-                                    foregroundColor: Colors.white,
-                                    elevation: 4,
-                                    shadowColor: const Color(
-                                      0xFF10B981,
-                                    ).withValues(alpha: 0.4),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                  ),
-                                  onPressed: () async {
-                                    final success = await provider.checkIn();
-                                    if (!success && context.mounted) {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        SnackBar(
-                                          content: Text(provider.statusMessage),
-                                          backgroundColor: Colors.redAccent,
-                                        ),
-                                      );
-                                    }
-                                  },
-                                  child: const Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(Icons.play_arrow_rounded, size: 28),
-                                      SizedBox(width: 8),
-                                      Text(
-                                        'START / CHECK IN',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          letterSpacing: 1.0,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              )
-                            else
-                              SizedBox(
-                                width: double.infinity,
-                                height: 56,
-                                child: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFFEF4444),
-                                    foregroundColor: Colors.white,
-                                    elevation: 4,
-                                    shadowColor: const Color(
-                                      0xFFEF4444,
-                                    ).withValues(alpha: 0.4),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                  ),
-                                  onPressed: () async {
-                                    await provider.checkOut();
-                                    if (context.mounted) {
-                                      _showCheckoutSummaryDialog(
-                                        context,
-                                        provider,
-                                      );
-                                    }
-                                  },
-                                  child: const Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(Icons.stop_rounded, size: 28),
-                                      SizedBox(width: 8),
-                                      Text(
-                                        'STOP / CHECK OUT',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          letterSpacing: 1.0,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(24.r),
                               ),
-                          ],
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Colors.black12,
+                                  blurRadius: 12,
+                                  offset: Offset(0, -4),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (!isTracking)
+                                  SizedBox(
+                                    width: double.infinity,
+                                    height: 56.h,
+                                    child: ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: const Color(0xFF10B981),
+                                        foregroundColor: Colors.white,
+                                        elevation: 4,
+                                        shadowColor: const Color(
+                                          0xFF10B981,
+                                        ).withValues(alpha: 0.4),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(16.r),
+                                        ),
+                                      ),
+                                      onPressed: () async {
+                                        final success = await provider.checkIn();
+                                        if (!success && context.mounted) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text(provider.statusMessage),
+                                              backgroundColor: Colors.redAccent,
+                                            ),
+                                          );
+                                        }
+                                      },
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Icon(Icons.play_arrow_rounded, size: 28.sp),
+                                          SizedBox(width: 8.w),
+                                          Text(
+                                            'START / CHECK IN',
+                                            style: TextStyle(
+                                              fontSize: 16.sp,
+                                              fontWeight: FontWeight.bold,
+                                              letterSpacing: 1.0,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  )
+                                else
+                                  SizedBox(
+                                    width: double.infinity,
+                                    height: 56.h,
+                                    child: ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: const Color(0xFFEF4444),
+                                        foregroundColor: Colors.white,
+                                        elevation: 4,
+                                        shadowColor: const Color(
+                                          0xFFEF4444,
+                                        ).withValues(alpha: 0.4),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(16.r),
+                                        ),
+                                      ),
+                                      onPressed: () async {
+                                        await provider.checkOut();
+                                        if (context.mounted) {
+                                          _showCheckoutSummaryDialog(
+                                            context,
+                                            provider,
+                                          );
+                                        }
+                                      },
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Icon(Icons.stop_rounded, size: 28.sp),
+                                          SizedBox(width: 8.w),
+                                          Text(
+                                            'STOP / CHECK OUT',
+                                            style: TextStyle(
+                                              fontSize: 16.sp,
+                                              fontWeight: FontWeight.bold,
+                                              letterSpacing: 1.0,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                     ],

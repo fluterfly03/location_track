@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import '../../providers/tracking_provider.dart';
 import '../widgets/ai_summary_card.dart';
@@ -16,34 +17,34 @@ class AiSummaryScreen extends StatelessWidget {
             backgroundColor: const Color(0xFF0F172A),
             elevation: 0,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+              icon: Icon(Icons.arrow_back_rounded, color: Colors.white, size: 22.sp),
               onPressed: () => Navigator.pop(context),
             ),
             title: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(6),
+                  padding: EdgeInsets.all(6.r),
                   decoration: BoxDecoration(
                     color: const Color(0xFF6366F1).withValues(alpha: 0.2),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.auto_awesome, color: Color(0xFF818CF8), size: 20),
+                  child: Icon(Icons.auto_awesome, color: const Color(0xFF818CF8), size: 20.sp),
                 ),
-                const SizedBox(width: 10),
-                const Column(
+                SizedBox(width: 10.w),
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'AI Visit Assistant',
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 18.sp,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
                     ),
                     Text(
                       'Automated Summary & Q&A',
-                      style: TextStyle(fontSize: 11, color: Colors.white54),
+                      style: TextStyle(fontSize: 11.sp, color: Colors.white54),
                     ),
                   ],
                 ),
@@ -51,15 +52,20 @@ class AiSummaryScreen extends StatelessWidget {
             ),
           ),
           body: SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  AiSummaryCard(
-                    sessions: provider.history,
-                    activeSession: provider.activeSession,
+            child: Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: 700.w),
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.all(16.r),
+                  child: Column(
+                    children: [
+                      AiSummaryCard(
+                        sessions: provider.history,
+                        activeSession: provider.activeSession,
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),

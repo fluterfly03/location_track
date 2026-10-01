@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import '../../providers/distance_provider.dart';
 import '../../services/distance_api_service.dart';
@@ -12,10 +13,10 @@ class ApiDistanceCard extends StatelessWidget {
       builder: (context, provider, child) {
         return Card(
           elevation: 2,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
           color: Colors.white,
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(16.r),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -23,15 +24,15 @@ class ApiDistanceCard extends StatelessWidget {
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(8),
+                      padding: EdgeInsets.all(8.r),
                       decoration: BoxDecoration(
                         color: const Color(0xFF6366F1).withValues(alpha: 0.15),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.api_rounded, color: Color(0xFF6366F1), size: 20),
+                      child: Icon(Icons.api_rounded, color: const Color(0xFF6366F1), size: 20.r),
                     ),
-                    const SizedBox(width: 12),
-                    const Expanded(
+                    SizedBox(width: 12.w),
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -39,13 +40,13 @@ class ApiDistanceCard extends StatelessWidget {
                             'API Distance Feed',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 15,
-                              color: Color(0xFF0F172A),
+                              fontSize: 15.sp,
+                              color: const Color(0xFF0F172A),
                             ),
                           ),
                           Text(
                             'Task 2 – Missing API Data Handling',
-                            style: TextStyle(fontSize: 11, color: Colors.grey),
+                            style: TextStyle(fontSize: 11.sp, color: Colors.grey),
                           ),
                         ],
                       ),
@@ -53,22 +54,22 @@ class ApiDistanceCard extends StatelessWidget {
                   ],
                 ),
 
-                const SizedBox(height: 12),
+                SizedBox(height: 12.h),
 
                 // Interactive Scenario Selector for Testing & Demonstration
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
                   decoration: BoxDecoration(
                     color: const Color(0xFFF1F5F9),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(12.r),
                     border: Border.all(color: Colors.grey.shade300),
                   ),
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<DistanceApiScenario>(
                       isExpanded: true,
                       value: provider.activeScenario,
-                      icon: const Icon(Icons.arrow_drop_down_rounded, color: Color(0xFF6366F1)),
-                      style: const TextStyle(fontSize: 12, color: Color(0xFF0F172A), fontWeight: FontWeight.w600),
+                      icon: Icon(Icons.arrow_drop_down_rounded, color: const Color(0xFF6366F1), size: 24.r),
+                      style: TextStyle(fontSize: 12.sp, color: const Color(0xFF0F172A), fontWeight: FontWeight.w600),
                       onChanged: (DistanceApiScenario? newScenario) {
                         if (newScenario != null) {
                           provider.setScenario(newScenario);
@@ -77,14 +78,17 @@ class ApiDistanceCard extends StatelessWidget {
                       items: DistanceApiScenario.values.map((scenario) {
                         return DropdownMenuItem<DistanceApiScenario>(
                           value: scenario,
-                          child: Text(scenario.label),
+                          child: Text(
+                            scenario.label,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         );
                       }).toList(),
                     ),
                   ),
                 ),
 
-                const SizedBox(height: 16),
+                SizedBox(height: 16.h),
 
                 // State Rendering Switch
                 _buildContentArea(context, provider),
@@ -100,19 +104,19 @@ class ApiDistanceCard extends StatelessWidget {
     // 1. LOADING STATE
     if (provider.isLoading) {
       return Container(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(20.r),
         alignment: Alignment.center,
-        child: const Column(
+        child: Column(
           children: [
             SizedBox(
-              width: 24,
-              height: 24,
-              child: CircularProgressIndicator(strokeWidth: 2.5, color: Color(0xFF6366F1)),
+              width: 24.r,
+              height: 24.r,
+              child: const CircularProgressIndicator(strokeWidth: 2.5, color: Color(0xFF6366F1)),
             ),
-            SizedBox(height: 10),
+            SizedBox(height: 10.h),
             Text(
               'Fetching distance from API...',
-              style: TextStyle(fontSize: 12, color: Colors.grey),
+              style: TextStyle(fontSize: 12.sp, color: Colors.grey),
             ),
           ],
         ),
@@ -123,37 +127,43 @@ class ApiDistanceCard extends StatelessWidget {
     if (provider.isSuccess) {
       return Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16.r),
         decoration: BoxDecoration(
           color: const Color(0xFFECFDF5),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(16.r),
           border: Border.all(color: const Color(0xFFA7F3D0)),
         ),
         child: Column(
           children: [
-            const Row(
+            Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.check_circle_rounded, color: Color(0xFF059669), size: 18),
-                SizedBox(width: 6),
-                Text(
-                  'API DISTANCE LOADED',
-                  style: TextStyle(
-                    color: Color(0xFF059669),
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.0,
+                Icon(Icons.check_circle_rounded, color: const Color(0xFF059669), size: 18.r),
+                SizedBox(width: 6.w),
+                Flexible(
+                  child: Text(
+                    'API DISTANCE LOADED',
+                    style: TextStyle(
+                      color: const Color(0xFF059669),
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.0,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 6),
-            Text(
-              provider.formattedDistance,
-              style: const TextStyle(
-                color: Color(0xFF047857),
-                fontSize: 32,
-                fontWeight: FontWeight.w800,
+            SizedBox(height: 6.h),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                provider.formattedDistance,
+                style: TextStyle(
+                  color: const Color(0xFF047857),
+                  fontSize: 32.sp,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ),
           ],
@@ -165,47 +175,51 @@ class ApiDistanceCard extends StatelessWidget {
     if (provider.isUnavailable) {
       return Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16.r),
         decoration: BoxDecoration(
           color: const Color(0xFFFFFBEB),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(16.r),
           border: Border.all(color: const Color(0xFFFDE68A)),
         ),
         child: Column(
           children: [
-            const Row(
+            Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.warning_amber_rounded, color: Color(0xFFD97706), size: 20),
-                SizedBox(width: 6),
-                Text(
-                  'Distance unavailable',
-                  style: TextStyle(
-                    color: Color(0xFFB45309),
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                Icon(Icons.warning_amber_rounded, color: const Color(0xFFD97706), size: 20.r),
+                SizedBox(width: 6.w),
+                Flexible(
+                  child: Text(
+                    'Distance unavailable',
+                    style: TextStyle(
+                      color: const Color(0xFFB45309),
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
             ),
             if (provider.errorMessage != null) ...[
-              const SizedBox(height: 4),
+              SizedBox(height: 4.h),
               Text(
                 provider.errorMessage!,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 11, color: Color(0xFF92400E)),
+                style: TextStyle(fontSize: 11.sp, color: const Color(0xFF92400E)),
               ),
             ],
-            const SizedBox(height: 12),
+            SizedBox(height: 12.h),
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFD97706),
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
               ),
               onPressed: () => provider.retry(),
-              icon: const Icon(Icons.refresh_rounded, size: 16),
-              label: const Text('Retry', style: TextStyle(fontWeight: FontWeight.bold)),
+              icon: Icon(Icons.refresh_rounded, size: 16.r),
+              label: Text('Retry', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.sp)),
             ),
           ],
         ),
@@ -216,45 +230,49 @@ class ApiDistanceCard extends StatelessWidget {
     if (provider.isError) {
       return Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16.r),
         decoration: BoxDecoration(
           color: const Color(0xFFFEF2F2),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(16.r),
           border: Border.all(color: const Color(0xFFFCA5A5)),
         ),
         child: Column(
           children: [
-            const Row(
+            Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.error_outline_rounded, color: Color(0xFFDC2626), size: 20),
-                SizedBox(width: 6),
-                Text(
-                  'API Request Failed',
-                  style: TextStyle(
-                    color: Color(0xFFB91C1C),
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
+                Icon(Icons.error_outline_rounded, color: const Color(0xFFDC2626), size: 20.r),
+                SizedBox(width: 6.w),
+                Flexible(
+                  child: Text(
+                    'API Request Failed',
+                    style: TextStyle(
+                      color: const Color(0xFFB91C1C),
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 6),
+            SizedBox(height: 6.h),
             Text(
               provider.errorMessage ?? 'Unable to retrieve distance. Please try again.',
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 12, color: Color(0xFF991B1B)),
+              style: TextStyle(fontSize: 12.sp, color: const Color(0xFF991B1B)),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12.h),
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFDC2626),
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
               ),
               onPressed: () => provider.retry(),
-              icon: const Icon(Icons.refresh_rounded, size: 16),
-              label: const Text('Retry', style: TextStyle(fontWeight: FontWeight.bold)),
+              icon: Icon(Icons.refresh_rounded, size: 16.r),
+              label: Text('Retry', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.sp)),
             ),
           ],
         ),
@@ -264,3 +282,4 @@ class ApiDistanceCard extends StatelessWidget {
     return const SizedBox.shrink();
   }
 }
+

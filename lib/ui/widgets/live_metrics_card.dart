@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../models/tracking_session.dart';
 
 class LiveMetricsCard extends StatelessWidget {
@@ -25,7 +26,7 @@ class LiveMetricsCard extends StatelessWidget {
     final int pointsCount = active?.points.length ?? 0;
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(20.r),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: isTracking
@@ -34,19 +35,19 @@ class LiveMetricsCard extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(24.r),
         boxShadow: [
           BoxShadow(
             color: (isTracking ? const Color(0xFF10B981) : Colors.black).withValues(alpha: 0.2),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
+            blurRadius: 16.r,
+            offset: Offset(0, 8.h),
           ),
         ],
         border: Border.all(
           color: isTracking
               ? const Color(0xFF10B981).withValues(alpha: 0.4)
               : Colors.white12,
-          width: 1.5,
+          width: 1.5.w,
         ),
       ),
       child: Column(
@@ -58,26 +59,26 @@ class LiveMetricsCard extends StatelessWidget {
               Row(
                 children: [
                   Container(
-                    width: 10,
-                    height: 10,
+                    width: 10.w,
+                    height: 10.w,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: isTracking ? const Color(0xFF34D399) : Colors.amberAccent,
                       boxShadow: [
                         BoxShadow(
                           color: isTracking ? const Color(0xFF34D399) : Colors.amberAccent,
-                          blurRadius: 8,
-                          spreadRadius: 2,
+                          blurRadius: 8.r,
+                          spreadRadius: 2.r,
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8.w),
                   Text(
                     isTracking ? 'LIVE TRACKING' : 'LAST SUMMARY',
                     style: TextStyle(
                       color: isTracking ? const Color(0xFF34D399) : Colors.grey[400],
-                      fontSize: 12,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 1.2,
                     ),
@@ -85,20 +86,20 @@ class LiveMetricsCard extends StatelessWidget {
                 ],
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(20.r),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.timer_outlined, color: Colors.white70, size: 14),
-                    const SizedBox(width: 4),
+                    Icon(Icons.timer_outlined, color: Colors.white70, size: 14.sp),
+                    SizedBox(width: 4.w),
                     Text(
                       formattedDuration,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.white,
-                        fontSize: 13,
+                        fontSize: 13.sp,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -107,28 +108,28 @@ class LiveMetricsCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           // Total Kilometres Counter
           Center(
             child: Column(
               children: [
-                const Text(
+                Text(
                   'TOTAL DISTANCE',
                   style: TextStyle(
                     color: Colors.white54,
-                    fontSize: 11,
+                    fontSize: 11.sp,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 1.5,
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: 4.h),
                 FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Text(
                     formattedDist,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Colors.white,
-                      fontSize: 42,
+                      fontSize: 42.sp,
                       fontWeight: FontWeight.w900,
                       letterSpacing: -1.0,
                     ),
@@ -137,29 +138,34 @@ class LiveMetricsCard extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           const Divider(color: Colors.white12, height: 1),
-          const SizedBox(height: 14),
-          // Sub-metrics row
+          SizedBox(height: 14.h),
+          // Sub-metrics row with Expanded widgets for non-overflowing responsive layout
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildSubMetric(
-                icon: Icons.speed,
-                label: 'SPEED',
-                value: '${currentSpeedKmh.toStringAsFixed(1)} km/h',
+              Expanded(
+                child: _buildSubMetric(
+                  icon: Icons.speed,
+                  label: 'SPEED',
+                  value: '${currentSpeedKmh.toStringAsFixed(1)} km/h',
+                ),
               ),
-              Container(width: 1, height: 28, color: Colors.white12),
-              _buildSubMetric(
-                icon: Icons.place_outlined,
-                label: 'WAYPOINTS',
-                value: '$pointsCount pts',
+              Container(width: 1.w, height: 28.h, color: Colors.white12),
+              Expanded(
+                child: _buildSubMetric(
+                  icon: Icons.place_outlined,
+                  label: 'WAYPOINTS',
+                  value: '$pointsCount pts',
+                ),
               ),
-              Container(width: 1, height: 28, color: Colors.white12),
-              _buildSubMetric(
-                icon: Icons.straighten,
-                label: 'METERS',
-                value: '${(active?.totalDistanceMeters ?? 0.0).toStringAsFixed(0)} m',
+              Container(width: 1.w, height: 28.h, color: Colors.white12),
+              Expanded(
+                child: _buildSubMetric(
+                  icon: Icons.straighten,
+                  label: 'METERS',
+                  value: '${(active?.totalDistanceMeters ?? 0.0).toStringAsFixed(0)} m',
+                ),
               ),
             ],
           ),
@@ -176,26 +182,35 @@ class LiveMetricsCard extends StatelessWidget {
     return Column(
       children: [
         Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: Colors.white60, size: 14),
-            const SizedBox(width: 4),
-            Text(
-              label,
-              style: const TextStyle(
-                color: Colors.white54,
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
+            Icon(icon, color: Colors.white60, size: 14.sp),
+            SizedBox(width: 4.w),
+            Flexible(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    color: Colors.white54,
+                    fontSize: 10.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 2),
-        Text(
-          value,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
+        SizedBox(height: 2.h),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            value,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 14.sp,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
       ],

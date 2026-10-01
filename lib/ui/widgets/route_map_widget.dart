@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:latlong2/latlong.dart';
 import '../../models/tracking_point.dart';
 
@@ -76,26 +77,26 @@ class _RouteMapWidgetState extends State<RouteMapWidget> {
       markers.add(
         Marker(
           point: LatLng(widget.startPoint!.latitude, widget.startPoint!.longitude),
-          width: 50,
-          height: 50,
+          width: 50.r,
+          height: 50.r,
           child: Column(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
                 decoration: BoxDecoration(
                   color: const Color(0xFF10B981),
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(4.r),
                 ),
-                child: const Text(
+                child: Text(
                   'START',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 9,
+                    fontSize: 9.sp,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
-              const Icon(Icons.location_on, color: Color(0xFF10B981), size: 28),
+              Icon(Icons.location_on, color: const Color(0xFF10B981), size: 28.r),
             ],
           ),
         ),
@@ -107,26 +108,26 @@ class _RouteMapWidgetState extends State<RouteMapWidget> {
       markers.add(
         Marker(
           point: LatLng(widget.endPoint!.latitude, widget.endPoint!.longitude),
-          width: 50,
-          height: 50,
+          width: 50.r,
+          height: 50.r,
           child: Column(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
                 decoration: BoxDecoration(
                   color: Colors.redAccent,
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(4.r),
                 ),
-                child: const Text(
+                child: Text(
                   'END',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 9,
+                    fontSize: 9.sp,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
-              const Icon(Icons.flag, color: Colors.redAccent, size: 28),
+              Icon(Icons.flag, color: Colors.redAccent, size: 28.r),
             ],
           ),
         ),
@@ -138,26 +139,26 @@ class _RouteMapWidgetState extends State<RouteMapWidget> {
       markers.add(
         Marker(
           point: LatLng(widget.currentPoint!.latitude, widget.currentPoint!.longitude),
-          width: 44,
-          height: 44,
+          width: 44.r,
+          height: 44.r,
           child: Stack(
             alignment: Alignment.center,
             children: [
               Container(
-                width: 36,
-                height: 36,
+                width: 36.r,
+                height: 36.r,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: Colors.blueAccent.withValues(alpha: 0.3),
                 ),
               ),
               Container(
-                width: 20,
-                height: 20,
+                width: 20.r,
+                height: 20.r,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: Colors.blueAccent,
-                  border: Border.all(color: Colors.white, width: 3),
+                  border: Border.all(color: Colors.white, width: 3.r),
                   boxShadow: const [
                     BoxShadow(color: Colors.black26, blurRadius: 4),
                   ],
@@ -170,7 +171,7 @@ class _RouteMapWidgetState extends State<RouteMapWidget> {
     }
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(20.r),
       child: Stack(
         children: [
           FlutterMap(
@@ -207,8 +208,8 @@ class _RouteMapWidgetState extends State<RouteMapWidget> {
             ],
           ),
           Positioned(
-            right: 12,
-            bottom: 12,
+            right: 12.w,
+            bottom: 12.h,
             child: FloatingActionButton.small(
               heroTag: 'recenter_map_btn',
               backgroundColor: _followUser ? Colors.blueAccent : Colors.white,
@@ -219,7 +220,7 @@ class _RouteMapWidgetState extends State<RouteMapWidget> {
                 });
                 _centerOnCurrentLocation();
               },
-              child: const Icon(Icons.my_location),
+              child: Icon(Icons.my_location, size: 20.r),
             ),
           ),
         ],
@@ -227,3 +228,4 @@ class _RouteMapWidgetState extends State<RouteMapWidget> {
     );
   }
 }
+

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/tracking_session.dart';
 import '../../services/ai_summary_service.dart';
@@ -120,52 +121,70 @@ class _AiSummaryCardState extends State<AiSummaryCard> {
   void _showApiKeyDialog() {
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Row(
-          children: [
-            Icon(Icons.key, color: Colors.amber),
-            SizedBox(width: 8),
-            Text('Gemini AI Key'),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Enter your Gemini API key for LLM-powered visit summaries. Leave blank to use the built-in smart NLP summary engine.',
-              style: TextStyle(fontSize: 12, color: Colors.black87),
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: 450.w),
+          child: Padding(
+            padding: EdgeInsets.all(20.r),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.key, color: Colors.amber, size: 24.r),
+                    SizedBox(width: 8.w),
+                    Text(
+                      'Gemini AI Key',
+                      style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 12.h),
+                Text(
+                  'Enter your Gemini API key for LLM-powered visit summaries. Leave blank to use the built-in smart NLP summary engine.',
+                  style: TextStyle(fontSize: 12.sp, color: Colors.black87),
+                ),
+                SizedBox(height: 12.h),
+                TextField(
+                  controller: _apiKeyController,
+                  style: TextStyle(fontSize: 14.sp),
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
+                    hintText: 'AIzaSy...',
+                    labelText: 'API Key',
+                    labelStyle: TextStyle(fontSize: 13.sp),
+                  ),
+                  obscureText: true,
+                ),
+                SizedBox(height: 16.h),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      child: Text('Cancel', style: TextStyle(fontSize: 14.sp)),
+                    ),
+                    SizedBox(width: 8.w),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF10B981),
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+                      ),
+                      onPressed: () {
+                        _saveApiKey(_apiKeyController.text);
+                        Navigator.pop(ctx);
+                      },
+                      child: Text('Save Key', style: TextStyle(fontSize: 14.sp)),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _apiKeyController,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: 'AIzaSy...',
-                labelText: 'API Key',
-              ),
-              obscureText: true,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
           ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF10B981),
-              foregroundColor: Colors.white,
-            ),
-            onPressed: () {
-              _saveApiKey(_apiKeyController.text);
-              Navigator.pop(ctx);
-            },
-            child: const Text('Save Key'),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -175,7 +194,7 @@ class _AiSummaryCardState extends State<AiSummaryCard> {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(24.r),
         boxShadow: const [
           BoxShadow(
             color: Colors.black12,
@@ -185,7 +204,7 @@ class _AiSummaryCardState extends State<AiSummaryCard> {
         ],
         border: Border.all(color: const Color(0xFFE2E8F0)),
       ),
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(20.r),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -193,45 +212,50 @@ class _AiSummaryCardState extends State<AiSummaryCard> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF8B5CF6), Color(0xFF6366F1)],
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(
-                      Icons.auto_awesome,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'AI Visit Assistant',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF0F172A),
+              Expanded(
+                child: Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(8.r),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF8B5CF6), Color(0xFF6366F1)],
                         ),
+                        borderRadius: BorderRadius.circular(12.r),
                       ),
-                      Text(
-                        'Automated Visit Summary & Q&A',
-                        style: TextStyle(fontSize: 11, color: Colors.grey),
+                      child: Icon(
+                        Icons.auto_awesome,
+                        color: Colors.white,
+                        size: 20.r,
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'AI Visit Assistant',
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF0F172A),
+                            ),
+                          ),
+                          Text(
+                            'Automated Visit Summary & Q&A',
+                            style: TextStyle(fontSize: 11.sp, color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
               IconButton(
                 icon: Icon(
                   Icons.settings_outlined,
+                  size: 22.r,
                   color: _savedApiKey.isNotEmpty ? const Color(0xFF10B981) : Colors.grey,
                 ),
                 onPressed: _showApiKeyDialog,
@@ -239,19 +263,19 @@ class _AiSummaryCardState extends State<AiSummaryCard> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
 
           // Automated Summary Container
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(16.r),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
+              gradient: const LinearGradient(
                 colors: [
-                  const Color(0xFFF8FAFC),
-                  const Color(0xFFF1F5F9),
+                  Color(0xFFF8FAFC),
+                  Color(0xFFF1F5F9),
                 ],
               ),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(16.r),
               border: Border.all(color: const Color(0xFFCBD5E1)),
             ),
             child: Column(
@@ -260,72 +284,72 @@ class _AiSummaryCardState extends State<AiSummaryCard> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       'DAILY ACTIVITY SUMMARY',
                       style: TextStyle(
-                        fontSize: 10,
+                        fontSize: 10.sp,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF64748B),
+                        color: const Color(0xFF64748B),
                         letterSpacing: 1.2,
                       ),
                     ),
                     if (_isGeneratingSummary)
-                      const SizedBox(
-                        width: 14,
-                        height: 14,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF6366F1)),
+                      SizedBox(
+                        width: 14.r,
+                        height: 14.r,
+                        child: const CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF6366F1)),
                       )
                     else
                       InkWell(
                         onTap: _generateAutomatedSummary,
-                        child: const Row(
+                        child: Row(
                           children: [
-                            Icon(Icons.refresh, size: 12, color: Color(0xFF6366F1)),
-                            SizedBox(width: 4),
+                            Icon(Icons.refresh, size: 12.r, color: const Color(0xFF6366F1)),
+                            SizedBox(width: 4.w),
                             Text(
                               'Refresh',
-                              style: TextStyle(fontSize: 11, color: Color(0xFF6366F1), fontWeight: FontWeight.bold),
+                              style: TextStyle(fontSize: 11.sp, color: const Color(0xFF6366F1), fontWeight: FontWeight.bold),
                             ),
                           ],
                         ),
                       ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8.h),
                 Text(
                   _automatedSummary,
-                  style: const TextStyle(
-                    fontSize: 13.5,
+                  style: TextStyle(
+                    fontSize: 13.5.sp,
                     height: 1.45,
-                    color: Color(0xFF1E293B),
+                    color: const Color(0xFF1E293B),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
 
           // Example Questions Section
-          const Text(
+          Text(
             'Ask AI Questions:',
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 12.sp,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF64748B),
+              color: const Color(0xFF64748B),
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: 8.w,
+            runSpacing: 8.h,
             children: _exampleQuestions.map((q) {
               return ActionChip(
                 backgroundColor: const Color(0xFFEFF6FF),
                 side: const BorderSide(color: Color(0xFFBFDBFE)),
-                labelStyle: const TextStyle(
-                  fontSize: 11.5,
-                  color: Color(0xFF1D4ED8),
+                labelStyle: TextStyle(
+                  fontSize: 11.5.sp,
+                  color: const Color(0xFF1D4ED8),
                   fontWeight: FontWeight.w600,
                 ),
                 label: Text(q),
@@ -333,30 +357,30 @@ class _AiSummaryCardState extends State<AiSummaryCard> {
               );
             }).toList(),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
 
           // AI Q&A Response Box (if answered)
           if (_aiAnswer.isNotEmpty)
             Container(
-              margin: const EdgeInsets.only(bottom: 14),
-              padding: const EdgeInsets.all(14),
+              margin: EdgeInsets.only(bottom: 14.h),
+              padding: EdgeInsets.all(14.r),
               decoration: BoxDecoration(
                 color: const Color(0xFFF0FDF4),
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(16.r),
                 border: Border.all(color: const Color(0xFF86EFAC)),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.smart_toy_outlined, color: Color(0xFF16A34A), size: 20),
-                  const SizedBox(width: 10),
+                  Icon(Icons.smart_toy_outlined, color: const Color(0xFF16A34A), size: 20.r),
+                  SizedBox(width: 10.w),
                   Expanded(
                     child: Text(
                       _aiAnswer,
-                      style: const TextStyle(
-                        fontSize: 13,
+                      style: TextStyle(
+                        fontSize: 13.sp,
                         height: 1.4,
-                        color: Color(0xFF14532D),
+                        color: const Color(0xFF14532D),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -371,42 +395,43 @@ class _AiSummaryCardState extends State<AiSummaryCard> {
               Expanded(
                 child: TextField(
                   controller: _queryController,
+                  style: TextStyle(fontSize: 13.sp),
                   onSubmitted: (val) => _askQuestion(val),
                   decoration: InputDecoration(
                     hintText: 'Ask AI about your visits...',
-                    hintStyle: const TextStyle(fontSize: 13, color: Colors.grey),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    hintStyle: TextStyle(fontSize: 13.sp, color: Colors.grey),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
                     filled: true,
                     fillColor: const Color(0xFFF8FAFC),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(14.r),
                       borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(14.r),
                       borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(14.r),
                       borderSide: const BorderSide(color: Color(0xFF6366F1), width: 1.5),
                     ),
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8.w),
               IconButton.filled(
                 style: IconButton.styleFrom(
                   backgroundColor: const Color(0xFF6366F1),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                  padding: const EdgeInsets.all(12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
+                  padding: EdgeInsets.all(12.r),
                 ),
                 icon: _isAnsweringQuestion
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                    ? SizedBox(
+                        width: 18.r,
+                        height: 18.r,
+                        child: const CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                       )
-                    : const Icon(Icons.send_rounded, color: Colors.white, size: 18),
+                    : Icon(Icons.send_rounded, color: Colors.white, size: 18.r),
                 onPressed: () => _askQuestion(_queryController.text),
               ),
             ],
@@ -416,3 +441,4 @@ class _AiSummaryCardState extends State<AiSummaryCard> {
     );
   }
 }
+
