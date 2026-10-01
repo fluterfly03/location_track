@@ -8,6 +8,7 @@ import '../widgets/route_map_widget.dart';
 import '../widgets/history_sheet.dart';
 import '../widgets/ai_summary_card.dart';
 import '../widgets/offline_sync_card.dart';
+import '../widgets/api_distance_card.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -209,7 +210,11 @@ class HomeScreen extends StatelessWidget {
                                 onOpenAppSettings: () => provider.openAppSettings(),
                               ),
 
-                              // Offline & Synchronization Status Card
+                              // Task 2: API Distance Service Card
+                              const ApiDistanceCard(),
+                              const SizedBox(height: 16),
+
+                              // Task 1: Offline & Synchronization Status Card
                               const OfflineSyncCard(),
                               const SizedBox(height: 16),
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/tracking_provider.dart';
+import 'providers/distance_provider.dart';
 import 'ui/screens/home_screen.dart';
 
 void main() {
@@ -13,8 +14,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => TrackingProvider(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => TrackingProvider()),
+        ChangeNotifierProvider(create: (_) => DistanceProvider()),
+      ],
       child: MaterialApp(
         title: 'Location & Distance Tracker',
         debugShowCheckedModeBanner: false,
