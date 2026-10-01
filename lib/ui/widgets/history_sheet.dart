@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/tracking_session.dart';
+import 'sync_status_badge.dart';
 
 class HistorySheet extends StatelessWidget {
   final List<TrackingSession> history;
@@ -147,6 +148,8 @@ class HistorySheet extends StatelessWidget {
                             ),
                             Row(
                               children: [
+                                SyncStatusBadge(status: session.syncStatus, compact: true),
+                                const SizedBox(width: 8),
                                 const Icon(Icons.timer, size: 14, color: Colors.grey),
                                 const SizedBox(width: 4),
                                 Text(

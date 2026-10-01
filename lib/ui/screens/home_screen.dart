@@ -7,6 +7,7 @@ import '../widgets/permission_banner.dart';
 import '../widgets/route_map_widget.dart';
 import '../widgets/history_sheet.dart';
 import '../widgets/ai_summary_card.dart';
+import '../widgets/offline_sync_card.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -207,6 +208,10 @@ class HomeScreen extends StatelessWidget {
                                 onOpenGpsSettings: () => provider.openLocationSettings(),
                                 onOpenAppSettings: () => provider.openAppSettings(),
                               ),
+
+                              // Offline & Synchronization Status Card
+                              const OfflineSyncCard(),
+                              const SizedBox(height: 16),
 
                               // Live Metrics Card (Distance in km, Duration, Speed)
                               LiveMetricsCard(

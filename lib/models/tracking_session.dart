@@ -1,8 +1,10 @@
 import 'package:intl/intl.dart';
 import 'tracking_point.dart';
+import 'sync_record.dart';
 
 class TrackingSession {
   final String id;
+  final String idempotencyKey;
   final DateTime startTime;
   DateTime? endTime;
   TrackingPoint? startLocation;
@@ -10,9 +12,13 @@ class TrackingSession {
   final List<TrackingPoint> points;
   double totalDistanceMeters;
   bool isTracking;
+  SyncStatus syncStatus;
+  DateTime? lastSyncedAt;
+  String? syncErrorMessage;
 
   TrackingSession({
     required this.id,
+    String? idempotencyKey,
     required this.startTime,
     this.endTime,
     this.startLocation,
@@ -20,7 +26,11 @@ class TrackingSession {
     List<TrackingPoint>? points,
     this.totalDistanceMeters = 0.0,
     this.isTracking = true,
-  }) : points = points ?? [];
+    this.syncStatus = SyncStatus.pending,
+    this.lastSyncedAt,
+    this.syncErrorMessage,
+  })  : idempotencyKey = idempotencyKey ?? 'idemp_${id}',
+        points = points ?? [];
 
   /// Distance in Kilometres rounded to 3 decimals
   double get totalDistanceKm => totalDistanceMeters / 1000.0;
@@ -54,6 +64,7 @@ class TrackingSession {
 
   Map<String, dynamic> toJson() => {
         'id': id,
+        'idempotencyKey': idempotencyKey,
         'startTime': startTime.toIso8601String(),
         'endTime': endTime?.toIso8601String(),
         'startLocation': startLocation?.toJson(),
@@ -61,11 +72,15 @@ class TrackingSession {
         'points': points.map((p) => p.toJson()).toList(),
         'totalDistanceMeters': totalDistanceMeters,
         'isTracking': isTracking,
+        'syncStatus': syncStatus.name,
+        'lastSyncedAt': lastSyncedAt?.toIso8601String(),
+        'syncErrorMessage': syncErrorMessage,
       };
 
   factory TrackingSession.fromJson(Map<String, dynamic> json) {
     return TrackingSession(
       id: json['id'] as String,
+      idempotencyKey: json['idempotencyKey'] as String? ?? 'idemp_${json['id']}',
       startTime: DateTime.parse(json['startTime'] as String),
       endTime: json['endTime'] != null ? DateTime.parse(json['endTime'] as String) : null,
       startLocation: json['startLocation'] != null
@@ -80,6 +95,14 @@ class TrackingSession {
           [],
       totalDistanceMeters: (json['totalDistanceMeters'] as num?)?.toDouble() ?? 0.0,
       isTracking: json['isTracking'] as bool? ?? false,
+      syncStatus: SyncStatus.values.firstWhere(
+        (e) => e.name == json['syncStatus'],
+        orElse: () => SyncStatus.pending,
+      ),
+      lastSyncedAt: json['lastSyncedAt'] != null
+          ? DateTime.parse(json['lastSyncedAt'] as String)
+          : null,
+      syncErrorMessage: json['syncErrorMessage'] as String?,
     );
   }
 }
