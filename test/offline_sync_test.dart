@@ -1,7 +1,5 @@
-import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:task1/models/tracking_point.dart';
 import 'package:task1/models/tracking_session.dart';
 import 'package:task1/models/sync_record.dart';
 import 'package:task1/services/storage_service.dart';

@@ -102,7 +102,7 @@ class _OfflineSyncCardState extends State<OfflineSyncCard> {
                     ),
                     Switch(
                       value: isSimulatingOffline,
-                      activeColor: Colors.amber,
+                      activeThumbColor: Colors.amber,
                       inactiveTrackColor: isOnline ? const Color(0xFFD1FAE5) : Colors.grey.shade300,
                       activeTrackColor: Colors.amber.shade200,
                       onChanged: (_) => provider.toggleSimulatedOffline(),
@@ -297,7 +297,7 @@ class _OfflineSyncCardState extends State<OfflineSyncCard> {
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: queue.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 8),
+                      separatorBuilder: (_, _) => const SizedBox(height: 8),
                       itemBuilder: (ctx, index) {
                         final item = queue[index];
                         return Container(

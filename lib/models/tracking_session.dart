@@ -29,7 +29,7 @@ class TrackingSession {
     this.syncStatus = SyncStatus.pending,
     this.lastSyncedAt,
     this.syncErrorMessage,
-  })  : idempotencyKey = idempotencyKey ?? 'idemp_${id}',
+  })  : idempotencyKey = idempotencyKey ?? 'idemp_$id',
         points = points ?? [];
 
   /// Distance in Kilometres rounded to 3 decimals

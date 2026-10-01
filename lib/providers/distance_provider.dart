@@ -12,7 +12,7 @@ enum DistanceStatus {
 }
 
 class DistanceProvider extends ChangeNotifier {
-  final DistanceRepository _repository;
+  DistanceRepository _repository;
 
   DistanceStatus _status = DistanceStatus.initial;
   double? _distanceKm;
@@ -39,8 +39,13 @@ class DistanceProvider extends ChangeNotifier {
     DistanceRepository? repository,
     DistanceApiScenario? initialScenario,
     bool autoFetch = true,
-  })  : _repository = repository ?? DistanceRepository(),
-        _activeScenario = initialScenario ?? DistanceApiScenario.validDistance {
+  })  : _activeScenario = initialScenario ?? DistanceApiScenario.validDistance,
+        _repository = repository ??
+            DistanceRepository(
+              apiService: MockDistanceApiService(
+                activeScenario: initialScenario ?? DistanceApiScenario.validDistance,
+              ),
+            ) {
     if (autoFetch) {
       fetchDistance();
     }
@@ -50,23 +55,17 @@ class DistanceProvider extends ChangeNotifier {
   void setScenario(DistanceApiScenario scenario) {
     _activeScenario = scenario;
     final apiService = MockDistanceApiService(activeScenario: scenario);
-    // Fetch using new scenario
-    fetchDistanceWithService(apiService);
+    _repository = DistanceRepository(apiService: apiService);
+    fetchDistance();
   }
 
   Future<void> fetchDistance() async {
-    final apiService = MockDistanceApiService(activeScenario: _activeScenario);
-    await fetchDistanceWithService(apiService);
-  }
-
-  Future<void> fetchDistanceWithService(DistanceApiService apiService) async {
     _status = DistanceStatus.loading;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      final repo = DistanceRepository(apiService: apiService);
-      final response = await repo.getDistance();
+      final response = await _repository.getDistance();
       _lastResponse = response;
 
       if (response.isValid) {
@@ -98,6 +97,11 @@ class DistanceProvider extends ChangeNotifier {
     }
 
     notifyListeners();
+  }
+
+  Future<void> fetchDistanceWithService(DistanceApiService apiService) async {
+    _repository = DistanceRepository(apiService: apiService);
+    await fetchDistance();
   }
 
   Future<void> retry() async {

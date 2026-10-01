@@ -1,5 +1,3 @@
-import 'dart:async';
-import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:task1/models/distance_response.dart';
 import 'package:task1/services/distance_api_service.dart';
