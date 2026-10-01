@@ -16,63 +16,6 @@ This Flutter application is an enterprise-grade field tracking and location sync
 
 ---
 
-## Task 1 – Location Tracking & Distance
-
-### Implementation Details
-* **Check-in / Start Flow**: `TrackingProvider.checkIn()` verifies location permissions, captures initial coordinate fix (`LocationService.getCurrentLocation()`), creates a `TrackingSession` with initial `startLocation` and `startTime`, and initializes the position stream (`_startPositionStream()`).
-* **Movement Tracking**: Subscribes to `Geolocator.getPositionStream()` configured with platform-specific parameters (`AndroidSettings` / `AppleSettings`).
-* **Check-out / Stop Flow**: `TrackingProvider.checkOut()` stops the position stream, captures final `endLocation` and `endTime`, calculates final distance increment, persists the trip to local history, and enqueues the record for sync.
-* **Distance Calculation**: Uses `Geolocator.distanceBetween()` to calculate incremental geodesic distance in meters between consecutive valid waypoints, accumulating into `totalDistanceMeters`, converted to kilometres via `totalDistanceKm`.
-* **Filtering & Accuracy**: Points with accuracy $> 35.0$ meters are ignored. Stationary/duplicate points with displacement $< 3.0$ meters are filtered out. Speed jumps $> 42.0$ m/s (~150 km/h) are rejected as GPS teleportation anomalies.
-* **Background Tracking**: Android uses a Foreground Notification Service (`AndroidSettings.foregroundNotificationConfig`) with `enableWakeLock: true`. iOS uses `AppleSettings` with `showBackgroundLocationIndicator: true` and `UIBackgroundModes` set to `location`.
-* **Resource Disposal**: `TrackingProvider.dispose()` cancels `StreamSubscription<Position>` and duration timers to prevent memory leaks.
-
----
-
-## Task 2 – Missing Location/API Data Handling
-
-### Implementation Details
-* **Payload Validation**: `DistanceResponse.fromJson()` parses API JSON payloads and checks field existence, nullability, data types, non-NaN/non-infinite constraints, and non-negative bounds ($distance \ge 0.0$).
-* **Zero Fallback Rule**: Missing, null, or negative distance values are **never** populated with arbitrary numbers like `0.88 km` or `0.0 km`. `DistanceProvider` explicitly marks state as `DistanceStatus.unavailable`, setting `_distanceKm = null`.
-* **Error & Exception Mapping**: `DistanceRepository` translates `SocketException` into `NetworkError`, `TimeoutException` into `TimeoutError`, and `HttpException` into `ServerError`.
-* **User-Facing UI States**: `ApiDistanceCard` renders color-coded cards:
-  * **Success (Green)**: Valid distance loaded (e.g. `18.4 km`).
-  * **Unavailable (Orange)**: Null, missing field, or negative distance with explanation and Retry button.
-  * **Error (Red)**: Network offline, HTTP 500 server error, or request timeout with Retry button.
-* **Interactive Scenario Selector**: Includes a UI dropdown allowing manual testing of all 7 API scenarios live in the application.
-
----
-
-## Task 3 – Offline Synchronization
-
-### Implementation Details
-* **Local Persistence**: `TrackingSession` and `SyncRecord` queues are JSON-serialized and stored in `SharedPreferences` via `StorageService`.
-* **Connectivity Monitoring**: `NetworkService` listens to hardware state via `connectivity_plus` and includes a UI switch to toggle simulated offline mode.
-* **Auto-Sync on Reconnection**: When `NetworkService.isOnline` transitions to `true`, `SyncService` automatically processes pending and failed records in the queue.
-* **Retry Strategy**: Failed items increment `retryCount` up to 5 attempts. Users can trigger manual retries per item or flush the queue via `OfflineSyncCard`.
-
-### Critical Case: Server Response Lost Mid-Flight (Idempotency Engine)
-1. **Scenario**: Mobile sends record $\rightarrow$ Server successfully creates record $\rightarrow$ Network connection drops before HTTP 200 response reaches mobile $\rightarrow$ Mobile reconnects and retries sync.
-2. **Implementation**: Client generates a unique `idempotencyKey` (`idemp_session_$id`) for each trip session.
-3. **Deduplication**: Upon retry, `MockServerService` checks if `idempotencyKey` already exists in `_serverDatabase`. The server **does not create a duplicate entry**, increments attempt counter, and returns HTTP 200 with `isDuplicate: true` and the existing `serverRecordId`.
-4. **Verification**: Fully covered by Unit Test #12 in `offline_sync_test.dart` and executable via the "Test Edge Case: Loss of Server Response (Idempotency)" button in `OfflineSyncCard`.
-
----
-
-## Task 4 – AI Visit Summary
-
-### Implementation Details
-* **AI Provider**: Google Gemini 1.5 Flash via `google_generative_ai: ^0.4.7`.
-* **Context Assembly**: `AiSummaryService._prepareContextData()` collects check-in/out times, total km, visit count, first/last reverse-geocoded addresses, duration, and waypoint count into a structured context block.
-* **Prompt Engineering**: System prompt instructs Gemini: *"Provide a direct, friendly, and precise response based strictly on the context data above."*
-* **Hallucination Prevention**: AI is strictly restricted to formatting provided context data. Factual metrics (distance, timestamps, coordinates) originate directly from application models (`TrackingSession`).
-* **Fallback NLP Engine**: When no Gemini API key is supplied or network requests fail, `AiSummaryService` falls back to a rule-based NLP query engine answering questions (start time, end time, total km, first/last location, duration, overview).
-* **API Key Security**: Users enter Gemini API Key via UI settings dialog (`AiSummaryCard`). Secrets are stored locally in `SharedPreferences` and are never hard-coded in source files.
-
----
-
-## Task 5 – Code Quality & Architecture
-
 ### Architecture Overview
 The application follows Clean Layered Architecture with Provider state management:
 
@@ -101,12 +44,6 @@ The application follows Clean Layered Architecture with Provider state managemen
 │ StorageService, MockServerService, AiSummaryService     │
 └─────────────────────────────────────────────────────────┘
 ```
-
-* **Separation of Concerns**: UI widgets do not perform direct API calls or stream handling. Repositories handle data mapping, Providers manage reactive state, and Services encapsulate hardware/network interactions.
-* **Dependency Injection**: `MultiProvider` at root (`main.dart`) with constructor dependency injection across repositories.
-* **Enterprise Scalability**: Decoupled architecture allows swapping `MockDistanceApiService` or `MockServerService` with production HTTP clients without modifying UI or Provider logic.
-
----
 
 ## Project Structure
 
@@ -220,80 +157,12 @@ flutter build apk --release
 ```
 * **Why required**: `ACCESS_FINE_LOCATION` guarantees precise GPS coordinates for distance metrics. `FOREGROUND_SERVICE_LOCATION` prevents OS process suspension during active trip tracking.
 
-### iOS Configuration (`Info.plist`)
-```xml
-<key>NSLocationWhenInUseUsageDescription</key>
-<string>This app needs access to your location to track distance travelled.</string>
-<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-<string>This app needs background location access to track movement when the app is in background.</string>
-<key>NSLocationAlwaysUsageDescription</key>
-<string>This app needs location access in the background to log distance while walking or travelling.</string>
-<key>UIBackgroundModes</key>
-<array>
-    <string>location</string>
-</array>
-```
-* **Why required**: Apple App Store policies require explicit usage descriptions and `UIBackgroundModes: location` for background location updates while the app is minimized.
 
 ---
 
-## Distance Calculation
 
-### Technical Methodology
-1. **Input Coordinates**: Captured as `Position` objects containing `latitude`, `longitude`, `timestamp`, `accuracy`, and `speed`.
-2. **Filtering**: Candidate positions pass through `LocationService.processNewLocationPoint()`:
-   * Skip if `accuracy > 35.0` meters.
-   * Skip if displacement from last point $< 3.0$ meters (stationary noise).
-   * Skip if calculated velocity $> 42.0$ m/s (~150 km/h) (GPS teleport jump).
-3. **Geodesic Calculation**: Uses WGS-84 ellipsoid distance formula:
-   $$\text{distance} = \text{Geolocator.distanceBetween}(lat_1, lng_1, lat_2, lng_2)$$
-4. **Accumulation**: Valid incremental distance is added to `TrackingSession.totalDistanceMeters`.
-5. **Conversion**: Displayed in kilometres rounded to 3 decimals:
-   $$\text{totalDistanceKm} = \frac{\text{totalDistanceMeters}}{1000.0}$$
 
----
 
-## Offline-First Flow
-
-```mermaid
-flowchart TD
-    A[User Check-in / Start Trip] --> B[Capture Initial GPS Location]
-    B --> C[Track Waypoints via Position Stream]
-    C --> D{Is Internet Online?}
-    D -- Yes --> E[Send Record to Server API]
-    D -- No --> F[Buffer Payload in SharedPreferences]
-    F --> G[Mark Status: Pending Sync]
-    E --> H{Server Response Received?}
-    H -- Yes (HTTP 200/201) --> I[Mark Status: Synced]
-    H -- No (Response Loss/Drop) --> J[Mark Status: Failed & Store Idempotency Key]
-    J --> K[Network Connectivity Restored]
-    G --> K
-    K --> L[Auto-Sync Triggered via NetworkService]
-    L --> M[Server Deduplication Check via IdempotencyKey]
-    M -- Duplicate Found --> N[Server Returns Existing Record ID]
-    M -- New Record --> O[Server Creates Record]
-    N --> P[Client Updates Local Status: Synced]
-    O --> P
-```
-
----
-
-## AI Visit Summary Flow
-
-```mermaid
-flowchart TD
-    A[User Requests AI Summary / Asks Question] --> B[Aggregate Today's Tracking Sessions]
-    B --> C[Extract Check-in/out, Distance km, Waypoints, Locations]
-    C --> D[Reverse Geocode Coordinates to Street Addresses]
-    D --> E[Assemble Structured Factual Context Payload]
-    E --> F{Gemini API Key Provided?}
-    F -- Yes --> G[Send Payload to Gemini 1.5 Flash LLM]
-    G --> H{Gemini Response Received?}
-    H -- Success --> I[Display LLM Natural Language Summary]
-    H -- Error / Timeout --> J[Fallback to Smart Local NLP Engine]
-    F -- No --> J
-    J --> K[Display Factual Local Summary / Q&A Answer]
-```
 
 ### Representative AI Prompt Format
 ```text
@@ -357,50 +226,11 @@ The application includes 28 automated tests passing clean under `flutter test`:
 | 22 | AI Q&A distance query | Returns factual km distance | **Covered by automated test** |
 | 23 | App restart state restoration | Restores pending queue & active trip | **Covered by automated test** |
 
----
 
-## Known Limitations
 
-1. **Process Termination by OS (Killed App State)**: While background location tracking functions continuously while the app is in the background or minimized, if the host OS explicitly terminates the process due to extreme memory pressure, location stream listening pauses until app relaunch. (Standard behavior without native background service isolates like `flutter_background_service`).
-2. **Local Storage Technology**: Storage currently uses `SharedPreferences` with JSON queue serialization. For enterprise deployments exceeding tens of thousands of offline waypoints per session, migrating to SQLite (`sqflite` / `drift`) is recommended.
 
----
 
-## Security Considerations
 
-* **No Hard-coded Secrets**: No API keys, credentials, or tokens are committed in source code.
-* **Configurable Gemini API Key**: API key is entered securely via UI dialog and stored locally in private application preferences.
-* **PII Protection**: Coordinates and personal data are omitted from production error logs generated by `LoggerService`.
-
----
-
-## AI Tools Used
-
-During the development and testing of this assessment project, AI assistance was utilized for:
-* **Code Architecture & Abstraction**: Designing clean provider-repository-service layers.
-* **Edge Case Analysis**: Formulating server response loss mid-flight idempotency test strategy.
-* **Test Suite Generation**: Writing comprehensive unit and integration test assertions.
-* **Documentation**: Structuring technical explanations and Mermaid sequence diagrams.
-
----
-
-## Important Prompts Used
-
-*(Representative Prompts)*
-
-1. **Location Tracking Prompt**: *"Implement a robust location tracking provider in Flutter using geolocator that calculates geodesic distance, filters stationary points < 3m, rejects accuracy > 35m, and manages foreground notification settings."*
-2. **Zero Fallback Rule Prompt**: *"Write a DistanceResponse model parser in Dart that strictly validates API responses and ensures null, missing, or negative values are NEVER replaced with hard-coded fallbacks like 0.88 km."*
-3. **Idempotency Prompt**: *"Design an offline synchronization queue and mock server in Flutter using client-generated idempotency keys to prevent duplicate record creation when network responses drop mid-flight."*
-4. **AI Visit Summary Prompt**: *"Create an AI summary service integrating google_generative_ai with a fallback smart local NLP engine that answers travel queries based strictly on factual trip session context."*
-
----
-
-## Git / Submission Information
-
-* **Git Repository**: [ADD GITHUB LINK]
-* **Branch**: [ADD BRANCH NAME]
-* **Build Artifact**: [ADD APK LINK]
-* **Screen Recording**: [ADD VIDEO LINK]
 
 ---
 
